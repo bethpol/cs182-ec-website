@@ -4,8 +4,15 @@ import requests
 from dotenv import load_dotenv
 import sys
 import time
+import re
 
 COURSE_ID = 84647 # CS182 / EECS182
+
+def extract_links(content_xml):
+    if not content_xml:
+        return []
+    # Simple regex to find hrefs in xml content
+    return re.findall(r'href="([^"]+)"', content_xml)
 
 def main():
     # Load env from .env file
@@ -22,7 +29,9 @@ def main():
     headers = {'Authorization': token}
     
     all_threads = []
-    limit = 30 # EdStem default/safe limit
+    user_map = {} # id -> name
+    
+    limit = 30
     offset = 0
     page_num = 1
     
@@ -40,11 +49,18 @@ def main():
             
             if response.status_code != 200:
                 print(f"Error fetching data: {response.status_code}")
-                # print(response.text)
                 break
                 
             json_data = response.json()
             threads = json_data.get('threads', [])
+            users = json_data.get('users', [])
+            
+            # Update user map
+            for u in users:
+                user_id = u.get('id')
+                name = u.get('name')
+                if user_id and name:
+                    user_map[user_id] = name
             
             if not threads:
                 print("No more threads found.")
@@ -56,21 +72,56 @@ def main():
             offset += len(threads)
             page_num += 1
             
-            # Simple rate limiting or check to avoid infinite loops
             if len(threads) < limit:
                 print("Reached end of list.")
                 break
             
-            time.sleep(0.5) # Be nice to the API
+            time.sleep(0.5)
 
-        print(f"Finished scraping. Total threads: {len(all_threads)}")
+        print(f"Finished scraping. Processing {len(all_threads)} threads...")
         
+        processed_posts = []
+        for thread in all_threads:
+            # Map valid fields as requested
+            
+            # Author
+            user_id = thread.get('user_id')
+            author_name = user_map.get(user_id, "Unknown User")
+            
+            # Links
+            content = thread.get('content', '')
+            links = extract_links(content)
+            
+            # Attachments (EdStem usually puts file info in 'media' or 'files')
+            # Check for generic 'files' or 'media' list
+            attachments = []
+            if 'media' in thread and thread['media']:
+                # media objects usually have 'url' or 'key'
+                 attachments.extend(thread['media'])
+            if 'files' in thread:
+                 attachments.extend(thread['files'])
+            
+            post_obj = {
+                "guid": thread.get('id'),                # Requested: guid
+                "author": author_name,                   # Requested: author
+                "project_title": thread.get('title'),    # Requested: project title
+                "post_body": thread.get('document'),     # Requested: post body
+                "content_xml": content,                  # Keeping original just in case
+                "links": links,                          # Requested: links
+                "attachments": attachments,              # Requested: attachments
+                
+                # Extra metadata
+                "created_at": thread.get('created_at'),
+                "category": thread.get('category')
+            }
+            processed_posts.append(post_obj)
+
         data = {
             "status": "success",
             "course_id": COURSE_ID,
             "scraped_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "post_count": len(all_threads),
-            "posts": all_threads
+            "post_count": len(processed_posts),
+            "posts": processed_posts
         }
 
         output_path = os.path.join(os.path.dirname(__file__), '../client/data.json')

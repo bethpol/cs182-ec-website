@@ -24,10 +24,17 @@ for url in urls_to_try:
         data = resp.json()
         print(f"Top level keys: {list(data.keys())}")
         threads = data.get('threads', [])
-        print(f"Found {len(threads)} threads.")
+        users = data.get('users', [])
+        print(f"Found {len(threads)} threads and {len(users)} users.")
+        
         if threads:
-            print(f"Sample thread keys: {list(threads[0].keys())}")
-            print(f"Sample thread title: {threads[0].get('title')}")
+            t = threads[0]
+            print(f"Sample thread keys: {list(t.keys())}")
+            print(f"Files field: {t.get('media', 'N/A')}") # EdStem often uses 'media' or 'files'
+            print(f"Title: {t.get('title')}")
+            
+        if users:
+            print(f"Sample user: {users[0]}")
         break
     else:
         print(f"Response: {resp.text[:200]}")
