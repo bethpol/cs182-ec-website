@@ -53,3 +53,27 @@ Before running the website with real data, you need to scrape it.
 
 - **Formatting**: Please ensure code is formatted cleanly.
 - **Scraping**: The `scrape.py` script is currently set up to fetch basic info. You can modify it to fetch more specific data endpoints available in `edpy`.
+
+## 3. Fuzzy Filtering Script
+
+We have a utility script `filter_script.py` designed to filter posts for "Special Participation E" while handling typos and similar category names.
+
+### Usage
+```bash
+python filter_script.py
+```
+This reads `client/data.json` and outputs `client/filtered_data.json`.
+
+### How it Works
+The script uses a **"Smart" Fuzzy Matching** approach:
+
+1.  **Fuzzy Matching (Levenshtein Distance)**:
+    - It scans the project title using a sliding window.
+    - It calculates the Levenshtein edit distance between the window and "Special Participation E".
+    - This allows it to catch typos like "Special Particpation E".
+
+2.  **Category Disambiguation**:
+    - A simple fuzzy match would confuse "Special Participation A" with "E" (distance of 1).
+    - The script calculates the edit distance to **all** categories (A, B, C, D, E).
+    - It only keeps the post if "E" is the **strictly closest** match.
+    - This ensures we catch typos of "E" but correctly reject "Special Participation A/B/C/D".
