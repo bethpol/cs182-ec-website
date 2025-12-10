@@ -41,7 +41,7 @@ def enrich_post(post: dict) -> EnrichedPostData:
     {json.dumps(content_to_analyze, ensure_ascii=False)}
     """
     
-    max_retries = 3
+    max_retries = 10
     base_delay = 60
     
     for attempt in range(max_retries):
@@ -73,8 +73,8 @@ def main():
     parser.add_argument("--limit", type=int, help="Limit number of posts to process (for testing).")
     args = parser.parse_args()
 
-    input_file = '/Users/kithminiherath/Desktop/cs182-ec-website/client/filtered_data.json'
-    output_file = '/Users/kithminiherath/Desktop/cs182-ec-website/client/categorized_data.json'
+    input_file = '/home/kithmini/cs182-ec-website/client/filtered_data.json'
+    output_file = '/home/kithmini/cs182-ec-website/client/categorized_data.json'
 
     try:
         with open(input_file, 'r') as f:
@@ -90,46 +90,62 @@ def main():
 
     enriched_posts = []
     
+    # Helper function to save progress
+    def save_progress():
+        output_data = {
+            "status": data.get("status"),
+            "course_id": data.get("course_id"),
+            "scraped_at": data.get("scraped_at"),
+            "post_count": len(enriched_posts),
+            "posts": enriched_posts
+        }
+        with open(output_file, 'w') as f:
+            json.dump(output_data, f, indent=4)
+        # Optional: Print a small dot or message to indicate save
+        # print(".", end="", flush=True) 
+
     print(f"Processing {len(posts)} posts...")
     
-    for i, post in enumerate(posts):
-        print(f"[{i+1}/{len(posts)}] Processing {post.get('guid')}...")
-        
-        enrichment = enrich_post(post)
-        
-        if enrichment:
-            new_post = {
-                "guid": post.get("guid"),
-                "author": post.get("author"),
-                "project_title": post.get("project_title"),
-                "post_body": post.get("post_body"),
-                "created_at": post.get("created_at"),
-                "content_xml": post.get("content_xml"),
-                "post_summary": enrichment.post_summary,
-                "post_category": enrichment.post_category,
-                "primary_app_link": enrichment.primary_app_link,
-                "body_links": enrichment.body_links,
-                "attachments": enrichment.attachments,
-            }
-            enriched_posts.append(new_post)
-        else:
-            print(f"Skipping post {post.get('guid')} due to error.")
-            # Optionally keep original post or handle differently
-        
-        time.sleep(7.0) # Rate limit strict: 10 RPM = 1 request every 6s
+    try:
+        for i, post in enumerate(posts):
+            print(f"[{i+1}/{len(posts)}] Processing {post.get('guid')}...")
+            
+            enrichment = enrich_post(post)
+            
+            if enrichment:
+                new_post = {
+                    "guid": post.get("guid"),
+                    "author": post.get("author"),
+                    "project_title": post.get("project_title"),
+                    "post_body": post.get("post_body"),
+                    "created_at": post.get("created_at"),
+                    "content_xml": post.get("content_xml"),
+                    "post_summary": enrichment.post_summary,
+                    "post_category": enrichment.post_category,
+                    "primary_app_link": enrichment.primary_app_link,
+                    "body_links": enrichment.body_links,
+                    "attachments": enrichment.attachments,
+                }
+                enriched_posts.append(new_post)
+                
+                # --- SAVE IMMEDIATELY HERE ---
+                save_progress()
+                # -----------------------------
+            else:
+                print(f"Skipping post {post.get('guid')} due to error.")
+            
+            # Sleep to respect rate limits
+            time.sleep(7.0) 
 
-    output_data = {
-        "status": data.get("status"),
-        "course_id": data.get("course_id"),
-        "scraped_at": data.get("scraped_at"),
-        "post_count": len(enriched_posts),
-        "posts": enriched_posts
-    }
+    except KeyboardInterrupt:
+        print("\nScript interrupted by user. Saving final progress...")
+        save_progress()
+        print(f"Saved {len(enriched_posts)} posts to {output_file}")
+        return
 
-    with open(output_file, 'w') as f:
-        json.dump(output_data, f, indent=4)
-    
-    print(f"Saved enriched data to {output_file}")
+    # Final save (just to be sure, though the loop save covers it)
+    save_progress()
+    print(f"Done! Saved all enriched data to {output_file}")
 
 if __name__ == "__main__":
     main()
