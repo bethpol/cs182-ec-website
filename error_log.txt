@@ -1,0 +1,2 @@
+Import edpy successful. Dir: ['Comment', 'CommentDeleteEvent', 'CommentNewEvent', 'CommentUpdateEvent', 'Course', 'CourseCountEvent', 'EdClient', 'Event', 'Thread', 'ThreadDeleteEvent', 'ThreadNewEvent', 'ThreadType', 'ThreadUpdateEvent', '__builtins__', '__cached__', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__path__', '__spec__', 'client', 'errors', 'events', 'listener', 'models', 'transport']
+EdClient in edpy: True
