@@ -73,8 +73,8 @@ def main():
     parser.add_argument("--limit", type=int, help="Limit number of posts to process (for testing).")
     args = parser.parse_args()
 
-    input_file = '/home/kithmini/cs182-ec-website/client/filtered_data.json'
-    output_file = '/home/kithmini/cs182-ec-website/client/categorized_data.json'
+    input_file = './client/filtered_data.json'
+    output_file = './client/categorized_data.json'
 
     try:
         with open(input_file, 'r') as f:

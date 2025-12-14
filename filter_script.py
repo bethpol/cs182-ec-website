@@ -53,8 +53,8 @@ def get_min_substring_distance(text, phrase):
                 
     return min_dist
 
-input_file = '/Users/kithminiherath/Desktop/cs182-ec-website/client/data.json'
-output_file = '/Users/kithminiherath/Desktop/cs182-ec-website/client/filtered_data.json'
+input_file = './client/data.json'
+output_file = './client/filtered_data.json'
 
 try:
     with open(input_file, 'r') as f:
