@@ -18,6 +18,8 @@ This project is a web application designed to display data scraped from EdStem. 
 - **`parse_jsons.py`**: Script to categorize and summarize posts using Gemini API.
 - **`cs182website.html`**: Final website html file.
 
+**Website link:** [https://cs182-ec-website.pages.dev/][https://cs182-ec-website.pages.dev/]
+
 ## Website Design Process
 
 ### 1. Scraper Setup
