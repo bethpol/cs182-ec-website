@@ -20,6 +20,10 @@ This project is a web application designed to display data scraped from EdStem. 
 
 **Website link:** [https://cs182-ec-website.pages.dev/](https://cs182-ec-website.pages.dev/)
 
+## Website Preview
+
+![Website View](assets/website_view.gif)
+
 ## Website Design Process
 
 ### 1. Scraper Setup
