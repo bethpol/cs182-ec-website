@@ -111,6 +111,7 @@ For choosing the featured posts, we basically prompted Gemini to select a few po
     - Category of the project (classified using Gemini-2.5-Flash)
     - Main artifact website/link
     - More links to other attachments found in the edstem post
-2. Filter projects by category
-3. Search feature that searches the title as well as the 25 word summary so that you won't miss a project 
-4. Simple static HTML page that can be hosted without any complicated backend
+2. Click a card to read more about the post 
+3. Filter projects by category
+4. Search feature that searches the title as well as the 25 word summary so that you won't miss a project 
+5. Simple static HTML page that can be hosted without any complicated backend
